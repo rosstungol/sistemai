@@ -48,3 +48,7 @@
 - `components/` — UI composition only; no business logic.
 - `app/api/` — route handlers for auth, triggering, and persistence.
 - Name files after the responsibility they contain, not the technology.
+
+## Linting and Formatting
+
+- Use configured linting and formatting commands for code consistency.
