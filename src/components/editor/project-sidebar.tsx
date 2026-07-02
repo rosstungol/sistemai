@@ -4,6 +4,7 @@ import { Plus, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 
 type ProjectSidebarProps = {
 	isOpen: boolean
@@ -34,17 +35,19 @@ export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
 	return (
 		<>
 			<div
-				className={`fixed inset-0 z-40 transition-opacity duration-200 ${
+				className={cn(
+					'fixed inset-0 z-40 transition-opacity duration-200',
 					visible ? 'opacity-100' : 'opacity-0'
-				}`}
+				)}
 				style={{ pointerEvents: visible ? 'auto' : 'none' }}
 				onClick={onClose}
 				aria-hidden='true'
 			/>
 			<aside
-				className={`fixed top-0 left-0 z-50 flex h-full w-72 flex-col border-border-default border-r bg-bg-surface transition-transform duration-200 ${
+				className={cn(
+					'fixed top-0 left-0 z-50 flex h-full w-72 flex-col border-border-default border-r bg-bg-surface transition-transform duration-200',
 					visible ? 'translate-x-0' : '-translate-x-full'
-				}`}
+				)}
 				onTransitionEnd={() => {
 					if (!visible) setMounted(false)
 				}}
