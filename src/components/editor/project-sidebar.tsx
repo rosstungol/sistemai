@@ -1,6 +1,7 @@
 'use client'
 
 import { Plus, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -10,19 +11,43 @@ type ProjectSidebarProps = {
 }
 
 export function ProjectSidebar({ isOpen, onClose }: ProjectSidebarProps) {
+	const [mounted, setMounted] = useState(false)
+	const [visible, setVisible] = useState(false)
+	const prevOpen = useRef(isOpen)
+
+	useEffect(() => {
+		if (isOpen) {
+			setMounted(true)
+			const raf = requestAnimationFrame(() => {
+				requestAnimationFrame(() => setVisible(true))
+			})
+			return () => cancelAnimationFrame(raf)
+		}
+		if (prevOpen.current) {
+			setVisible(false)
+		}
+		prevOpen.current = isOpen
+	}, [isOpen])
+
+	if (!mounted) return null
+
 	return (
 		<>
-			{isOpen && (
-				<div
-					className='fixed inset-0 z-40'
-					onClick={onClose}
-					aria-hidden='true'
-				/>
-			)}
+			<div
+				className={`fixed inset-0 z-40 transition-opacity duration-200 ${
+					visible ? 'opacity-100' : 'opacity-0'
+				}`}
+				style={{ pointerEvents: visible ? 'auto' : 'none' }}
+				onClick={onClose}
+				aria-hidden='true'
+			/>
 			<aside
 				className={`fixed top-0 left-0 z-50 flex h-full w-72 flex-col border-border-default border-r bg-bg-surface transition-transform duration-200 ${
-					isOpen ? 'translate-x-0' : '-translate-x-full'
+					visible ? 'translate-x-0' : '-translate-x-full'
 				}`}
+				onTransitionEnd={() => {
+					if (!visible) setMounted(false)
+				}}
 			>
 				<div className='flex h-12 items-center justify-between border-border-default border-b px-4'>
 					<span className='font-medium text-sm text-text-primary'>
