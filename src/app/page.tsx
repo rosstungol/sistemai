@@ -1,7 +1,12 @@
-export default function Home() {
-	return (
-		<div className='flex h-screen items-center justify-center'>
-			<span className='font-bold text-4xl'>sistemai</span>
-		</div>
-	)
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+
+export default async function Home() {
+	const { isAuthenticated } = await auth()
+
+	if (isAuthenticated) {
+		redirect('/editor')
+	}
+
+	redirect('/sign-in')
 }

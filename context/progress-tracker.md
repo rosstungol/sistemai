@@ -3,10 +3,10 @@
 Update this file whenever the current phase, active feature, or implementation state changes.
 
 ## Current Phase
-- Foundation: Editor shell — navbar and sidebar
+- Editor — wire editor chrome into the main layout and sidebar toggle state
 
 ## Current Goal
-- Editor chrome components built and ready for integration
+- Editor workspace operational: navbar, sidebar, and canvas shell
 
 ## Completed
 
@@ -23,11 +23,24 @@ Update this file whenever the current phase, active feature, or implementation s
 - Project Sidebar (`components/editor/project-sidebar.tsx`) — floating slide-in overlay with tabs and new-project button
 - Dialog pattern verified: Title, Description, Footer actions supported by existing `components/ui/dialog.tsx`
 
+### 03 — Auth (`context/feature-specs/03-auth.md`)
+- Installed `@clerk/ui` for Clerk's `dark` theme
+- Created `src/proxy.ts` with protected-first route strategy (sign-in/sign-up public, all else protected)
+- Root layout wrapped with `ClerkProvider` using `dark` theme from `@clerk/ui/themes`
+- Clerk appearance variables mapped to project's existing CSS variables via `appearance.variables`
+- Sign-in page at `(auth)/sign-in/page.tsx` — two-panel layout (left: brand/features, right: Clerk form)
+- Sign-up page at `(auth)/sign-up/page.tsx` — matching two-panel layout
+- Root page (`/`) redirects authenticated users to `/editor`, unauthenticated to `/sign-in`
+- `UserButton` added to editor navbar right section for profile settings and logout
+- Editor layout (`app/editor/layout.tsx`) — client component wiring navbar, sidebar toggle, and page content
+- Editor page (`app/editor/page.tsx`) — workspace shell with empty state
+- Verification build passes with zero errors
+
 ## In Progress
 - None yet.
 
 ## Next Up
-- Integrate editor chrome into the main layout and wire sidebar toggle state
+- Project creation dialog and project list data binding
 
 ## Open Questions
 - None yet.
@@ -38,8 +51,15 @@ Update this file whenever the current phase, active feature, or implementation s
 - Custom CSS variables (`--bg-base`, `--text-primary`, `--accent-primary`, etc.) registered via `@theme inline` for Tailwind utility use
 - shadcn CSS variable layer (`--background`, `--foreground`, etc.) references the custom project variables
 - Editor components are interactive; marked `"use client"`
+- Auth uses Clerk (already installed before this phase): `@clerk/nextjs` v7, `@clerk/ui` for themes
+- Route protection via `proxy.ts` (`clerkMiddleware`) instead of `middleware.ts`
+- Clerk's `dark` theme used as base; CSS variable overrides ensure visual consistency with the design system
+- Auth pages use `(auth)` route group for clean URLs (`/sign-in`, `/sign-up`)
 
 ## Session Notes
 - Design system foundation complete. All UI primitives are available and ready for feature development.
 - Generated `components/ui/*` files must NOT be manually modified per spec.
 - Editor shell components implemented: navbar and project sidebar. Navbar accepts `isSidebarOpen` and `onToggleSidebar` props for parent-controlled state.
+- Clerk auth integrated: provider with dark theme, proxy-based route protection, sign-in/sign-up pages with two-panel layout, root page redirect, UserButton in navbar.
+- Editor layout created as client component managing sidebar state. Editor page shows empty state placeholder for project selection.
+- The `/editor` route is now live and protected by Clerk middleware. Authenticated users land on the editor workspace.
