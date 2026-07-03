@@ -22,18 +22,20 @@ Update this file whenever the current phase, active feature, or implementation s
 - Editor Navbar (`components/editor/editor-navbar.tsx`) — fixed-height top bar with sidebar toggle
 - Project Sidebar (`components/editor/project-sidebar.tsx`) — floating slide-in overlay with tabs and new-project button
 - Dialog pattern verified: Title, Description, Footer actions supported by existing `components/ui/dialog.tsx`
+- Editor layout (`app/editor/layout.tsx`) — client component wiring navbar, sidebar toggle, and page content
+- Editor page (`app/editor/page.tsx`) — workspace shell with empty state
 
 ### 03 — Auth (`context/feature-specs/03-auth.md`)
 - Installed `@clerk/ui` for Clerk's `dark` theme
 - Created `src/proxy.ts` with protected-first route strategy (sign-in/sign-up public, all else protected)
 - Root layout wrapped with `ClerkProvider` using `dark` theme from `@clerk/ui/themes`
 - Clerk appearance variables mapped to project's existing CSS variables via `appearance.variables`
-- Sign-in page at `(auth)/sign-in/page.tsx` — two-panel layout (left: brand/features, right: Clerk form)
-- Sign-up page at `(auth)/sign-up/page.tsx` — matching two-panel layout
-- Root page (`/`) redirects authenticated users to `/editor`, unauthenticated to `/sign-in`
+- Shared `(auth)/layout.tsx` — two-panel wrapper (left: brand/features via `AuthContent`, right: centered form slot)
+- Sign-in page at `(auth)/sign-in/[[...rest]]/page.tsx` — renders `<SignIn>` into shared layout
+- Sign-up page at `(auth)/sign-up/[[...rest]]/page.tsx` — renders `<SignUp>` into shared layout
+- Root page (`/`) redirects authenticated users to `/editor` (proxy middleware handles unauthenticated redirect)
+- `AuthContent` component moved to `components/auth/auth-content.tsx`
 - `UserButton` added to editor navbar right section for profile settings and logout
-- Editor layout (`app/editor/layout.tsx`) — client component wiring navbar, sidebar toggle, and page content
-- Editor page (`app/editor/page.tsx`) — workspace shell with empty state
 - Verification build passes with zero errors
 
 ## In Progress

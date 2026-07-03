@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-	title: 'sistemai',
+	title: 'sistemAI',
 	description: 'AI-powered collaborative system design workspace',
 }
 
@@ -31,7 +31,6 @@ export default function RootLayout({
 		>
 			<body className='flex min-h-full flex-col'>
 				<ClerkProvider
-					dynamic
 					appearance={{
 						theme: dark,
 						variables: {
