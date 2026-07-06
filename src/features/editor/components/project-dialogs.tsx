@@ -1,6 +1,6 @@
 'use client'
 
-import { type KeyboardEvent, useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import { Input } from '@/components/ui/input'
 import type { DialogType } from '@/features/editor/hooks/use-project-dialog'
 import { ProjectDialog } from './project-dialog'
@@ -30,8 +30,6 @@ export function ProjectDialogs({
 	onRename,
 	onDelete,
 }: ProjectDialogsProps) {
-	const renameInputRef = useRef<HTMLInputElement>(null)
-
 	const handleCreateKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Enter' && projectName.trim() && !loading) {
 			onCreate()
@@ -83,7 +81,6 @@ export function ProjectDialogs({
 			>
 				<div className='space-y-2'>
 					<Input
-						ref={renameInputRef}
 						placeholder='Project name'
 						value={projectName}
 						onChange={(e) => onProjectNameChange(e.target.value)}

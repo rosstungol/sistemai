@@ -1,7 +1,13 @@
 'use client'
 
-import { Pencil, Plus, Trash2, X } from 'lucide-react'
+import { MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Project } from '@/features/editor/hooks/use-project-dialog'
 import { cn } from '@/lib/utils'
@@ -85,24 +91,29 @@ export function ProjectSidebar({
 										className='group flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-text-secondary transition-colors hover:bg-bg-subtle'
 									>
 										<span className='truncate'>{project.name}</span>
-										<div className='flex items-center gap-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
-											<Button
-												variant='ghost'
-												size='icon-xs'
-												onClick={() => onRenameProject(project)}
-												aria-label={`Rename ${project.name}`}
+										<DropdownMenu>
+											<DropdownMenuTrigger
+												aria-label={`Actions for ${project.name}`}
+												className='flex items-center justify-center rounded-md p-1 text-text-secondary transition-colors hover:bg-bg-subtle focus:outline-none'
 											>
-												<Pencil className='size-3' />
-											</Button>
-											<Button
-												variant='ghost'
-												size='icon-xs'
-												onClick={() => onDeleteProject(project)}
-												aria-label={`Delete ${project.name}`}
-											>
-												<Trash2 className='size-3' />
-											</Button>
-										</div>
+												<MoreVertical className='size-3' />
+											</DropdownMenuTrigger>
+											<DropdownMenuContent align='end'>
+												<DropdownMenuItem
+													onClick={() => onRenameProject(project)}
+												>
+													<Pencil className='size-3' />
+													Rename
+												</DropdownMenuItem>
+												<DropdownMenuItem
+													variant='destructive'
+													onClick={() => onDeleteProject(project)}
+												>
+													<Trash2 className='size-3' />
+													Delete
+												</DropdownMenuItem>
+											</DropdownMenuContent>
+										</DropdownMenu>
 									</li>
 								))}
 							</ul>
