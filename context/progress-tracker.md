@@ -19,8 +19,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - Verified production build compiles with zero TypeScript and build errors
 
 ### 02 — Editor (`context/feature-specs/02-editor.md`)
-- Editor Navbar (`components/editor/editor-navbar.tsx`) — fixed-height top bar with sidebar toggle
-- Project Sidebar (`components/editor/project-sidebar.tsx`) — floating slide-in overlay with tabs and new-project button
+- Editor Navbar (`features/editor/components/editor-navbar.tsx`) — fixed-height top bar with sidebar toggle
+- Project Sidebar (`features/editor/components/project-sidebar.tsx`) — floating slide-in overlay with tabs and new-project button
 - Dialog pattern verified: Title, Description, Footer actions supported by existing `components/ui/dialog.tsx`
 - Editor layout (`app/editor/layout.tsx`) — client component wiring navbar, sidebar toggle, and page content
 - Editor page (`app/editor/page.tsx`) — workspace shell with empty state
@@ -34,19 +34,20 @@ Update this file whenever the current phase, active feature, or implementation s
 - Sign-in page at `(auth)/sign-in/[[...rest]]/page.tsx` — renders `<SignIn>` into shared layout
 - Sign-up page at `(auth)/sign-up/[[...rest]]/page.tsx` — renders `<SignUp>` into shared layout
 - Root page (`/`) redirects authenticated users to `/editor` (proxy middleware handles unauthenticated redirect)
-- `AuthContent` component moved to `components/auth/auth-content.tsx`
+- `AuthContent` component moved to `features/auth/components/auth-content.tsx`
 - `UserButton` added to editor navbar right section for profile settings and logout
 - Verification build passes with zero errors
 
 ### 04 — Project Dialogs (`context/feature-specs/04-project-dialogs.md`)
-- Created `src/hooks/use-project-dialog.tsx` — dedicated hook managing dialog type, form state (name/slug), loading state, and mock project list
-- Created `useEditorDialog` context — shares `openCreate`, `openRename`, `openDelete` across layout, sidebar, and editor page
-- Created `src/components/editor/project-dialogs.tsx` — three dialog components:
+- Created `features/editor/hooks/use-project-dialog.tsx` — dedicated hook managing dialog type, form state (name/slug), loading state, and mock project list
+- Created `features/editor/providers/editor-dialog-provider.tsx` — `EditorDialogProvider` context and `useEditorDialog` hook sharing `openCreate`, `openRename`, `openDelete` across layout, sidebar, and editor page
+- Created `features/editor/components/project-dialog.tsx` — reusable dialog shell extracted from `project-dialogs.tsx` (handles open/close, title, description, body, footer with Cancel + action button)
+- Created `features/editor/components/project-dialogs.tsx` — three dialog instances using `ProjectDialog`:
   - **Create**: project name input + live slug preview
   - **Rename**: pre-filled input, auto-focus, current name in description, Enter submits
   - **Delete**: destructive confirmation with `destructive` button variant
 - Updated `src/app/editor/page.tsx` — editor home with heading, description, and New Project button (Plus icon)
-- Updated `src/components/editor/project-sidebar.tsx`:
+- Updated `features/editor/components/project-sidebar.tsx`:
   - Mock project list in "My Projects" tab with inline Rename/Delete actions (visible on hover, owned only)
   - Shared projects listed without actions
   - Backdrop scrim (`bg-black/40`) added to overlay
@@ -73,8 +74,9 @@ Update this file whenever the current phase, active feature, or implementation s
 - Route protection via `proxy.ts` (`clerkMiddleware`) instead of `middleware.ts`
 - Clerk's `dark` theme used as base; CSS variable overrides ensure visual consistency with the design system
 - Auth pages use `(auth)` route group for clean URLs (`/sign-in`, `/sign-up`)
-- Dialog state managed via shared `useProjectDialog` hook + React context, allowing both sidebar and editor page to trigger dialogs without prop drilling through `children`
+- Dialog state managed via shared `useProjectDialog` hook + React context (separated into `EditorDialogProvider` in `features/editor/providers/`), allowing both sidebar and editor page to trigger dialogs without prop drilling through `children`
 - Mock data lives in the hook (`MOCK_PROJECTS`) with simulated 400ms async delay for create/rename/delete actions
+- Feature code organized under `src/features/` by domain (`auth/`, `editor/`) with components, hooks, and providers colocated per feature
 
 ## Session Notes
 - Design system foundation complete. All UI primitives are available and ready for feature development.
@@ -85,5 +87,5 @@ Update this file whenever the current phase, active feature, or implementation s
 - Project dialogs implemented: Create (name + live slug preview), Rename (pre-filled + auto-focus + Enter submit), Delete (destructive confirmation).
 - Sidebar shows mock project list with inline actions for owned projects; shared projects listed without actions.
 - Backdrop scrim (`bg-black/40`) added to sidebar overlay for mobile.
-- All dialog state, form state, and loading state managed by `useProjectDialog` hook, shared via `EditorDialogProvider` context.
+- All dialog state, form state, and loading state managed by `useProjectDialog` hook (`features/editor/hooks/`), shared via `EditorDialogProvider` context (`features/editor/providers/`).
 - The `/editor` route is live, protected by Clerk middleware. Authenticated users see the editor home with New Project flow.

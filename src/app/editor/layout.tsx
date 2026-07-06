@@ -1,13 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { EditorNavbar } from '@/components/editor/editor-navbar'
-import { ProjectDialogs } from '@/components/editor/project-dialogs'
-import { ProjectSidebar } from '@/components/editor/project-sidebar'
-import {
-	EditorDialogProvider,
-	useProjectDialog,
-} from '@/hooks/use-project-dialog'
+import { EditorNavbar } from '@/features/editor/components/editor-navbar'
+import { ProjectDialogs } from '@/features/editor/components/project-dialogs'
+import { ProjectSidebar } from '@/features/editor/components/project-sidebar'
+import { useProjectDialog } from '@/features/editor/hooks/use-project-dialog'
+import { EditorDialogProvider } from '@/features/editor/providers/editor-dialog-provider'
 
 function EditorShell({ children }: { children: React.ReactNode }) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false)

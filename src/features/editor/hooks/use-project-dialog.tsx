@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export type Project = {
 	id: string
@@ -41,6 +41,15 @@ export function useProjectDialog() {
 	const [loading, setLoading] = useState(false)
 	const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 	const [projects, setProjects] = useState<Project[]>(MOCK_PROJECTS)
+	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+	useEffect(() => {
+		return () => {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current)
+			}
+		}
+	}, [])
 
 	const slug = slugify(projectName)
 
@@ -63,6 +72,10 @@ export function useProjectDialog() {
 	}, [])
 
 	const close = useCallback(() => {
+		if (timeoutRef.current) {
+			clearTimeout(timeoutRef.current)
+			timeoutRef.current = null
+		}
 		setDialogType(null)
 		setProjectName('')
 		setSelectedProject(null)
@@ -78,7 +91,7 @@ export function useProjectDialog() {
 			slug: slugify(projectName.trim()),
 			isOwner: true,
 		}
-		setTimeout(() => {
+		timeoutRef.current = setTimeout(() => {
 			setProjects((prev) => [newProject, ...prev])
 			setLoading(false)
 			close()
@@ -88,7 +101,7 @@ export function useProjectDialog() {
 	const handleRename = useCallback(() => {
 		if (!projectName.trim() || !selectedProject) return
 		setLoading(true)
-		setTimeout(() => {
+		timeoutRef.current = setTimeout(() => {
 			setProjects((prev) =>
 				prev.map((p) =>
 					p.id === selectedProject.id
@@ -108,7 +121,7 @@ export function useProjectDialog() {
 	const handleDelete = useCallback(() => {
 		if (!selectedProject) return
 		setLoading(true)
-		setTimeout(() => {
+		timeoutRef.current = setTimeout(() => {
 			setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id))
 			setLoading(false)
 			close()
@@ -131,34 +144,4 @@ export function useProjectDialog() {
 		handleDelete,
 		projects,
 	}
-}
-
-type EditorDialogContextValue = {
-	openCreate: () => void
-	openRename: (project: Project) => void
-	openDelete: (project: Project) => void
-}
-
-const EditorDialogContext = createContext<EditorDialogContextValue | null>(null)
-
-export function EditorDialogProvider({
-	children,
-	value,
-}: {
-	children: React.ReactNode
-	value: EditorDialogContextValue
-}) {
-	return (
-		<EditorDialogContext.Provider value={value}>
-			{children}
-		</EditorDialogContext.Provider>
-	)
-}
-
-export function useEditorDialog() {
-	const context = useContext(EditorDialogContext)
-	if (!context) {
-		throw new Error('useEditorDialog must be used within EditorDialogProvider')
-	}
-	return context
 }

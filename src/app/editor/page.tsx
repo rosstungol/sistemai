@@ -2,7 +2,7 @@
 
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useEditorDialog } from '@/hooks/use-project-dialog'
+import { useEditorDialog } from '@/features/editor/providers/editor-dialog-provider'
 
 export default function EditorPage() {
 	const { openCreate } = useEditorDialog()

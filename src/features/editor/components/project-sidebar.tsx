@@ -3,7 +3,7 @@
 import { Pencil, Plus, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { Project } from '@/hooks/use-project-dialog'
+import type { Project } from '@/features/editor/hooks/use-project-dialog'
 import { cn } from '@/lib/utils'
 
 type ProjectSidebarProps = {
@@ -85,7 +85,7 @@ export function ProjectSidebar({
 										className='group flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-text-secondary transition-colors hover:bg-bg-subtle'
 									>
 										<span className='truncate'>{project.name}</span>
-										<div className='flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100'>
+										<div className='flex items-center gap-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100'>
 											<Button
 												variant='ghost'
 												size='icon-xs'

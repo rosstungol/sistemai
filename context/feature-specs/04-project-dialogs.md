@@ -4,7 +4,7 @@ Build the `/editor` home screen and add project dialogs/sidebar actions. No API 
 
 ## Editor Home
 
-Reuse existing editor layout. Do not modify the navbar or sidebar behavior.
+Reuse the existing editor layout for the home screen content.
 
 In the center of the page, add:
 - Heading: `Create a project or open an existing one`
@@ -50,7 +50,7 @@ On mobile:
 
 ## Implementation
 
-Create a dedicated hook to manage:
+Create a dedicated hook at `features/editor/hooks/use-project-dialog.tsx` to manage:
 - Dialog state
 - Form state
 - Loading state
