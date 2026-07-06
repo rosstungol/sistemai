@@ -8,8 +8,8 @@ export default function EditorPage() {
 	const { openCreate } = useEditorDialog()
 
 	return (
-		<div className='flex h-full w-full flex-col items-center justify-center gap-4'>
-			<div className='flex flex-col items-center gap-1'>
+		<div className='flex h-full w-full flex-col items-center justify-center gap-4 p-4'>
+			<div className='flex flex-col items-center gap-1 text-center'>
 				<h1 className='font-medium text-lg text-text-primary'>
 					Create a project or open an existing one
 				</h1>
