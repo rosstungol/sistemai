@@ -2,7 +2,7 @@ We need the base chrome components that frame every editor screen - the top navb
 
 ### Editor Navbar
 
-Create `components/editor/editor-navbar.tsx`.
+Create `features/editor/components/editor-navbar.tsx`.
 
 Requirements:
 - Fixed-height top navbar
@@ -14,7 +14,7 @@ Requirements:
 
 ### Project Sidebar
 
-Create `components/editor/project-sidebar.tsx`.
+Create `features/editor/components/project-sidebar.tsx`.
 
 Requirements:
 - Sidebar should float above the editor canvas
