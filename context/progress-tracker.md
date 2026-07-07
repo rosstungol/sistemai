@@ -10,6 +10,15 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+### 05 — Prisma (`context/feature-specs/05-prisma.md`)
+- Created `prisma/models/project.prisma` with `Project` (ownerId, name, description, status, canvasJsonPath, timestamps, indexes) and `ProjectCollaborator` (project relation with cascade delete, email, timestamps, unique constraint, indexes)
+- Both models added to shared schema in `prisma/schema.prisma` — Prisma v7 auto-loads all `.prisma` files from `prisma/` directory
+- Created `lib/prisma.ts` as a cached singleton that branches on `DATABASE_URL`: uses `accelerateUrl` for `prisma+postgres://` URLs, otherwise wraps `@prisma/adapter-pg` via `pg.Pool`
+- Client cached on `globalThis` in non-production for hot-reload safety
+- Client generated to `src/generated/prisma/` (imported as `@/generated/prisma/client`)
+- Initial migration `20260707135720_init` applied to the remote Prisma Postgres database
+- Production build passes with zero TypeScript errors
+
 ### 01 — Design System (`context/feature-specs/01-design-system.md`)
 - Initialized shadcn/ui (v4, base-nova style) with Tailwind v4
 - Added shadcn components: Button, Card, Dialog, Input, Tabs, Textarea, ScrollArea
