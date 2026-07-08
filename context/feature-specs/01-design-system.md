@@ -22,7 +22,7 @@ Create `lib/utils.ts` with a reusable `cn()` helper for merging Tailwind classes
 Ensure all components match the exsiting dark theme in `globals.css`.
 
 
-### Check when done
+## Check when done
 - All components import without errors
 - `cn()` works properly
 - No default light styling appears

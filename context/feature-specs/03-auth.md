@@ -29,7 +29,6 @@ Use `proxy.ts` in the `src` directory, not `middleware.ts`.
 Define public routes using the existing sign-in and sign-up env vars. Protect everything else by default.
 
 Update `/` route:
-
 - Authenticated users redirect to `/editor`.
 - Unauthenticated users redirect to `/sign-in`.
 
