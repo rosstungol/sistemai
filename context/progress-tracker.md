@@ -3,10 +3,10 @@
 Update this file whenever the current phase, active feature, or implementation state changes.
 
 ## Current Phase
-- Project dialogs — create, rename, and delete project dialogs wired into sidebar and editor home
+- Project APIs — backend CRUD routes for projects (list, create, rename, delete)
 
 ## Current Goal
-- Editor home screen with New Project button and project dialog flows
+- Project API routes with auth and owner checks
 
 ## Completed
 
@@ -64,6 +64,14 @@ Update this file whenever the current phase, active feature, or implementation s
 - All flows use mock data (no API calls or persistence)
 - Production build: zero TypeScript errors, zero lint errors
 
+### 06 — Project APIs (`context/feature-specs/06-project-apis.md`)
+- Created `src/app/api/projects/route.ts` — `GET` lists authenticated user's projects (ordered by `createdAt desc`); `POST` creates a project with `name` defaulting to `Untitled Project`
+- Created `src/app/api/projects/[projectId]/route.ts` — `PATCH` renames (owner-only, 403 for non-owners); `DELETE` deletes (owner-only, 403 for non-owners)
+- Auth checks via `auth()` from `@clerk/nextjs/server`: `401` for unauthenticated, `403` for non-owner mutations, `404` for missing projects
+- Route params use the Next.js 16 pattern (`Promise<params>` awaited in handler)
+- Moved `lib/prisma.ts` to `src/lib/prisma.ts` for consistency with `@/*` alias (maps to `./src/*`)
+- Production build passes with zero TypeScript errors
+
 ## In Progress
 - None yet.
 
@@ -86,6 +94,11 @@ Update this file whenever the current phase, active feature, or implementation s
 - Dialog state managed via shared `useProjectDialog` hook + React context (separated into `EditorDialogProvider` in `features/editor/providers/`), allowing both sidebar and editor page to trigger dialogs without prop drilling through `children`
 - Mock data lives in the hook (`MOCK_PROJECTS`) with simulated 400ms async delay for create/rename/delete actions
 - Feature code organized under `src/features/` by domain (`auth/`, `editor/`) with components, hooks, and providers colocated per feature
+- API routes organized under `src/app/api/` by resource (`projects/`)
+- Project owner checks enforced server-side in route handlers: 401 for unauthenticated, 403 for non-owner mutations
+- Route handler `params` is a Promise (Next.js 16 convention); must be awaited
+- `auth()` from `@clerk/nextjs/server` provides `isAuthenticated` and `userId` for server-side auth checks
+- `lib/prisma.ts` moved to `src/lib/prisma.ts` for consistency with the `@/*` path alias mapping to `./src/*`
 
 ## Session Notes
 - Design system foundation complete. All UI primitives are available and ready for feature development.
@@ -98,3 +111,4 @@ Update this file whenever the current phase, active feature, or implementation s
 - Backdrop scrim (`bg-black/40`) added to sidebar overlay for mobile.
 - All dialog state, form state, and loading state managed by `useProjectDialog` hook (`features/editor/hooks/`), shared via `EditorDialogProvider` context (`features/editor/providers/`).
 - The `/editor` route is live, protected by Clerk middleware. Authenticated users see the editor home with New Project flow.
+- Project API routes implemented at `/api/projects` (GET, POST) and `/api/projects/[projectId]` (PATCH, DELETE). All routes enforce Clerk authentication. Mutations check project ownership (`ownerId === userId`). Missing projects return 404. Non-owner mutations return 403. Unauthenticated requests return 401.
