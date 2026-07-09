@@ -3,10 +3,10 @@
 Update this file whenever the current phase, active feature, or implementation state changes.
 
 ## Current Phase
-- Project APIs — backend CRUD routes for projects (list, create, rename, delete)
+- Editor home — wiring sidebar and dialogs to real project API
 
 ## Current Goal
-- Project API routes with auth and owner checks
+- Server-side data fetching, real project mutations, navigation, and refresh
 
 ## Completed
 
@@ -72,11 +72,30 @@ Update this file whenever the current phase, active feature, or implementation s
 - Moved `lib/prisma.ts` to `src/lib/prisma.ts` for consistency with `@/*` alias (maps to `./src/*`)
 - Production build passes with zero TypeScript errors
 
+### 07 — Editor Home (`context/feature-specs/07-editor-home.md`)
+- Added `slug` field to Prisma `Project` model (unique) and pushed schema to database
+- Created `src/lib/projects.ts` — `getUserProjects()` server-only helper that fetches owned and shared projects via Prisma
+- Updated `POST /api/projects` to accept `slug`; generates fallback slug from name + random suffix when not provided
+- Fixed `DELETE /api/projects/[projectId]` route handler signature (missing `NextRequest` first param)
+- Refactored `use-project-dialog.tsx` — removed mock data and simulated delays; all mutations call real API:
+  - **Create**: generates unique slug from name + 4-char suffix (pinned when dialog opens, stable while typing), calls `POST /api/projects`, navigates to `/editor/<slug>` on success
+  - **Rename**: calls `PATCH /api/projects/[id]`, calls `router.refresh()` on success
+  - **Delete**: calls `DELETE /api/projects/[id]`, redirects to `/editor` if deleting the active workspace, otherwise refreshes
+- Restructured `app/editor/layout.tsx` — now a server component that fetches projects via `getUserProjects()` and passes them to a new `EditorClientShell` client component
+- Created `EditorClientShell` — client component managing sidebar state, dialog state, navbar, sidebar, and dialogs; wraps children in `EditorDialogProvider`
+- Created `EditorHomeContent` — client component extracted from the old page (heading + New Project button), uses `useEditorDialog` context
+- `app/editor/page.tsx` — simplified to server component rendering `EditorHomeContent`
+- No client-side fetching for initial load; all data flows through server component
+- The project `id` (cuid) is the source of truth for both the project identifier and the Liveblocks room ID — documented by the POST response returning the full project object with `id`
+- Production build: zero TypeScript errors, zero build errors
+
 ## In Progress
 - None yet.
 
 ## Next Up
 - Canvas workspace and project canvas data binding
+
+## Recently Completed
 
 ## Open Questions
 - None yet.
@@ -92,7 +111,7 @@ Update this file whenever the current phase, active feature, or implementation s
 - Clerk's `dark` theme used as base; CSS variable overrides ensure visual consistency with the design system
 - Auth pages use `(auth)` route group for clean URLs (`/sign-in`, `/sign-up`)
 - Dialog state managed via shared `useProjectDialog` hook + React context (separated into `EditorDialogProvider` in `features/editor/providers/`), allowing both sidebar and editor page to trigger dialogs without prop drilling through `children`
-- Mock data lives in the hook (`MOCK_PROJECTS`) with simulated 400ms async delay for create/rename/delete actions
+- Slug suffix pinned via ref when create dialog opens; stable across keystrokes, regenerated each reopen
 - Feature code organized under `src/features/` by domain (`auth/`, `editor/`) with components, hooks, and providers colocated per feature
 - API routes organized under `src/app/api/` by resource (`projects/`)
 - Project owner checks enforced server-side in route handlers: 401 for unauthenticated, 403 for non-owner mutations

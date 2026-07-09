@@ -1,6 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 export type Project = {
 	id: string
@@ -11,21 +12,9 @@ export type Project = {
 
 export type DialogType = 'create' | 'rename' | 'delete' | null
 
-export const MOCK_PROJECTS: Project[] = [
-	{
-		id: '1',
-		name: 'Cloud Architecture',
-		slug: 'cloud-architecture',
-		isOwner: true,
-	},
-	{
-		id: '2',
-		name: 'Microservices Design',
-		slug: 'microservices-design',
-		isOwner: true,
-	},
-	{ id: '3', name: 'Team Workspace', slug: 'team-workspace', isOwner: false },
-]
+function generateSuffix(): string {
+	return Math.random().toString(36).substring(2, 6)
+}
 
 function slugify(name: string): string {
 	const slug = name
@@ -36,24 +25,21 @@ function slugify(name: string): string {
 }
 
 export function useProjectDialog() {
+	const router = useRouter()
 	const [dialogType, setDialogType] = useState<DialogType>(null)
 	const [projectName, setProjectName] = useState('')
 	const [loading, setLoading] = useState(false)
 	const [selectedProject, setSelectedProject] = useState<Project | null>(null)
-	const [projects, setProjects] = useState<Project[]>(MOCK_PROJECTS)
-	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+	const suffixRef = useRef('')
 
-	useEffect(() => {
-		return () => {
-			if (timeoutRef.current) {
-				clearTimeout(timeoutRef.current)
-			}
-		}
-	}, [])
-
-	const slug = slugify(projectName)
+	const slug = useMemo(() => {
+		const name = projectName.trim()
+		if (!name || !suffixRef.current) return ''
+		return `${slugify(name)}-${suffixRef.current}`
+	}, [projectName])
 
 	const openCreate = useCallback(() => {
+		suffixRef.current = generateSuffix()
 		setDialogType('create')
 		setProjectName('')
 		setSelectedProject(null)
@@ -72,61 +58,69 @@ export function useProjectDialog() {
 	}, [])
 
 	const close = useCallback(() => {
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current)
-			timeoutRef.current = null
-		}
+		suffixRef.current = ''
 		setDialogType(null)
 		setProjectName('')
 		setSelectedProject(null)
 		setLoading(false)
 	}, [])
 
-	const handleCreate = useCallback(() => {
+	const handleCreate = useCallback(async () => {
 		if (!projectName.trim()) return
 		setLoading(true)
-		const newProject: Project = {
-			id: String(Date.now()),
-			name: projectName.trim(),
-			slug: slugify(projectName.trim()),
-			isOwner: true,
-		}
-		timeoutRef.current = setTimeout(() => {
-			setProjects((prev) => [newProject, ...prev])
-			setLoading(false)
+		try {
+			const res = await fetch('/api/projects', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name: projectName.trim(), slug }),
+			})
+			if (!res.ok) throw new Error('Failed to create project')
 			close()
-		}, 400)
-	}, [projectName, close])
+			router.push(`/editor/${slug}`)
+		} catch {
+			setLoading(false)
+		}
+	}, [projectName, slug, close, router])
 
-	const handleRename = useCallback(() => {
+	const handleRename = useCallback(async () => {
 		if (!projectName.trim() || !selectedProject) return
 		setLoading(true)
-		timeoutRef.current = setTimeout(() => {
-			setProjects((prev) =>
-				prev.map((p) =>
-					p.id === selectedProject.id
-						? {
-								...p,
-								name: projectName.trim(),
-								slug: slugify(projectName.trim()),
-							}
-						: p
-				)
-			)
-			setLoading(false)
+		try {
+			const res = await fetch(`/api/projects/${selectedProject.id}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ name: projectName.trim() }),
+			})
+			if (!res.ok) throw new Error('Failed to rename project')
 			close()
-		}, 400)
-	}, [projectName, selectedProject, close])
+			router.refresh()
+		} catch {
+			setLoading(false)
+		}
+	}, [projectName, selectedProject, close, router])
 
-	const handleDelete = useCallback(() => {
+	const handleDelete = useCallback(async () => {
 		if (!selectedProject) return
 		setLoading(true)
-		timeoutRef.current = setTimeout(() => {
-			setProjects((prev) => prev.filter((p) => p.id !== selectedProject.id))
-			setLoading(false)
+		try {
+			const res = await fetch(`/api/projects/${selectedProject.id}`, {
+				method: 'DELETE',
+			})
+			if (!res.ok) throw new Error('Failed to delete project')
 			close()
-		}, 400)
-	}, [selectedProject, close])
+
+			const isActiveWorkspace =
+				window.location.pathname === `/editor/${selectedProject.id}`
+			if (isActiveWorkspace) {
+				router.push('/editor')
+				router.refresh()
+			} else {
+				router.refresh()
+			}
+		} catch {
+			setLoading(false)
+		}
+	}, [selectedProject, close, router])
 
 	return {
 		dialogType,
@@ -142,6 +136,5 @@ export function useProjectDialog() {
 		handleCreate,
 		handleRename,
 		handleDelete,
-		projects,
 	}
 }

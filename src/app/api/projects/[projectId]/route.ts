@@ -43,11 +43,10 @@ export async function PATCH(
 	return Response.json(updated)
 }
 
-export async function DELETE({
-	params,
-}: {
-	params: Promise<{ projectId: string }>
-}) {
+export async function DELETE(
+	_request: NextRequest,
+	{ params }: { params: Promise<{ projectId: string }> }
+) {
 	const { isAuthenticated, userId } = await auth()
 	if (!isAuthenticated) {
 		return Response.json({ error: 'Unauthorized' }, { status: 401 })
