@@ -10,6 +10,22 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+### 09 — Share Dialog (`context/feature-specs/09-share-dialog.md`)
+- Created `src/app/api/projects/[projectId]/collaborators/route.ts`:
+  - `GET` — lists collaborators enriched with Clerk user data (display name, avatar) via `clerkClient.users.getUserList()`, falls back to email-only display when no Clerk user is found; includes `isOwner` flag for the requesting user
+  - `POST` — invites a collaborator by email (owner-only, 403 for non-owners). Validates email format, returns 409 for duplicate collaborators. `@unique([projectId, email])` constraint enforces uniqueness at DB level
+  - `DELETE` — removes a collaborator by `collaboratorId` (owner-only, 403 for non-owners)
+  - All routes enforce Clerk authentication (401 for unauthenticated, 404 for missing projects)
+- Created `src/features/editor/components/share-dialog.tsx` — `ShareDialog` component:
+  - Fetches collaborator list on open; shows loading spinner while fetching
+  - **Owner view**: invite input with email validation (Enter to submit), collapsible list with remove button (`UserMinus` icon) per collaborator, "Copy link" button in the footer
+  - **Collaborator view**: read-only list of collaborators
+  - Collaborator rows display Clerk avatar (if available) or a `Mail` icon fallback, display name and email when Clerk data is found, email-only when not
+  - Copy link button with temporary "Copied!" feedback (`Check` icon, 2s timeout)
+  - Uses existing `Dialog` component (shadcn v4 base-nova, `@base-ui/react/dialog`)
+- Updated `EditorClientShell` — added `isShareOpen` state, wired `onShare` navbar callback, renders `ShareDialog` conditionally when `currentProject` is defined (only visible on workspace pages)
+- Production build: zero TypeScript errors, zero build errors
+
 ### 05 — Prisma (`context/feature-specs/05-prisma.md`)
 - Created `prisma/models/project.prisma` with `Project` (ownerId, name, description, status, canvasJsonPath, timestamps, indexes) and `ProjectCollaborator` (project relation with cascade delete, email, timestamps, unique constraint, indexes)
 - Both models added to shared schema in `prisma/schema.prisma` — Prisma v7 auto-loads all `.prisma` files from `prisma/` directory
@@ -113,7 +129,6 @@ Update this file whenever the current phase, active feature, or implementation s
 - Real canvas logic with React Flow
 - Liveblocks integration for real-time collaboration
 - AI chat sidebar implementation
-- Share dialog functionality
 
 ## Recently Completed
 

@@ -6,6 +6,7 @@ import { AiSidebar } from '@/features/editor/components/ai-sidebar'
 import { EditorNavbar } from '@/features/editor/components/editor-navbar'
 import { ProjectDialogs } from '@/features/editor/components/project-dialogs'
 import { ProjectSidebar } from '@/features/editor/components/project-sidebar'
+import { ShareDialog } from '@/features/editor/components/share-dialog'
 import { useProjectDialog } from '@/features/editor/hooks/use-project-dialog'
 import { EditorDialogProvider } from '@/features/editor/providers/editor-dialog-provider'
 import type { ProjectData } from '@/lib/projects'
@@ -21,6 +22,7 @@ export function EditorClientShell({
 }: EditorClientShellProps) {
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 	const [isAiOpen, setIsAiOpen] = useState(false)
+	const [isShareOpen, setIsShareOpen] = useState(false)
 	const params = useParams()
 	const roomId = params?.roomId as string | undefined
 
@@ -53,7 +55,7 @@ export function EditorClientShell({
 					isSidebarOpen={isSidebarOpen}
 					onToggleSidebar={() => setIsSidebarOpen((v) => !v)}
 					projectName={currentProject?.name}
-					onShare={() => {}}
+					onShare={() => setIsShareOpen(true)}
 					onToggleAi={() => setIsAiOpen((v) => !v)}
 					isAiOpen={isAiOpen}
 				/>
@@ -70,6 +72,14 @@ export function EditorClientShell({
 					{children}
 				</main>
 				<AiSidebar isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
+				{currentProject && (
+					<ShareDialog
+						open={isShareOpen}
+						onClose={() => setIsShareOpen(false)}
+						projectId={currentProject.id}
+						projectSlug={currentProject.slug}
+					/>
+				)}
 			</div>
 			<ProjectDialogs
 				dialogType={dialogType}
