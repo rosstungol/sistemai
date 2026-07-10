@@ -87,6 +87,12 @@ Update this file whenever the current phase, active feature, or implementation s
 - `app/editor/page.tsx` — simplified to server component rendering `EditorHomeContent`
 - No client-side fetching for initial load; all data flows through server component
 - The project `id` (cuid) is the source of truth for both the project identifier and the Liveblocks room ID — documented by the POST response returning the full project object with `id`
+  - Hardened auth checks: `!isAuthenticated` changed to `!isAuthenticated || !userId` across all four API route handlers to ensure `userId` is non-null before use
+  - Slug normalization: `POST /api/projects` now lowercases slugs, replaces whitespace with hyphens, and strips non-alphanumeric characters
+  - Slug conflict handling: `POST /api/projects` catches `Prisma.PrismaClientKnownRequestError` (code `P2002`) and returns `409 Conflict` with a descriptive error when a slug is taken
+  - Error propagation: added `error` state (`string | null`) to the hook, surfaced as red text in `ProjectDialog` header; all three dialogs (Create, Rename, Delete) display API errors inline
+  - Create uses real slug from API: `handleCreate` now navigates to `/editor/${project.slug}` from the response body instead of the local slug variable
+  - Fixed shared project lookup in `getUserProjects()`: now fetches the authenticated user's email via `currentUser()` and filters collaborators by `some: { email: userEmail }` instead of `some: {}`
 - Production build: zero TypeScript errors, zero build errors
 
 ## In Progress
