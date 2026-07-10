@@ -29,6 +29,7 @@ export function useProjectDialog() {
 	const [dialogType, setDialogType] = useState<DialogType>(null)
 	const [projectName, setProjectName] = useState('')
 	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState<string | null>(null)
 	const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 	const suffixRef = useRef('')
 
@@ -63,6 +64,7 @@ export function useProjectDialog() {
 		setProjectName('')
 		setSelectedProject(null)
 		setLoading(false)
+		setError(null)
 	}, [])
 
 	const handleCreate = useCallback(async () => {
@@ -75,9 +77,12 @@ export function useProjectDialog() {
 				body: JSON.stringify({ name: projectName.trim(), slug }),
 			})
 			if (!res.ok) throw new Error('Failed to create project')
+
+			const project = await res.json()
 			close()
-			router.push(`/editor/${slug}`)
+			router.push(`/editor/${project.slug}`)
 		} catch {
+			setError('Failed to create project')
 			setLoading(false)
 		}
 	}, [projectName, slug, close, router])
@@ -95,6 +100,7 @@ export function useProjectDialog() {
 			close()
 			router.refresh()
 		} catch {
+			setError('Failed to rename project')
 			setLoading(false)
 		}
 	}, [projectName, selectedProject, close, router])
@@ -118,6 +124,7 @@ export function useProjectDialog() {
 				router.refresh()
 			}
 		} catch {
+			setError('Failed to delete project')
 			setLoading(false)
 		}
 	}, [selectedProject, close, router])
@@ -128,6 +135,7 @@ export function useProjectDialog() {
 		setProjectName,
 		slug,
 		loading,
+		error,
 		selectedProject,
 		openCreate,
 		openRename,

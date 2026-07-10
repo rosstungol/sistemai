@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
 
 export type ProjectData = {
@@ -19,6 +19,14 @@ export async function getUserProjects(): Promise<{
 		return { owned: [], shared: [] }
 	}
 
+	const user = await currentUser()
+	const userEmail =
+		user?.primaryEmailAddress?.emailAddress ??
+		user?.emailAddresses?.[0]?.emailAddress
+	if (!userEmail) {
+		return { owned: [], shared: [] }
+	}
+
 	const [owned, shared] = await Promise.all([
 		prisma.project.findMany({
 			where: { ownerId: userId },
@@ -27,7 +35,7 @@ export async function getUserProjects(): Promise<{
 		prisma.project.findMany({
 			where: {
 				collaborators: {
-					some: {},
+					some: { email: userEmail },
 				},
 			},
 			orderBy: { createdAt: 'desc' },

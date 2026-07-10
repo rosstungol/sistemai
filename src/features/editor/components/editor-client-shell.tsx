@@ -24,6 +24,7 @@ export function EditorClientShell({
 		setProjectName,
 		slug,
 		loading,
+		error,
 		selectedProject,
 		openCreate,
 		openRename,
@@ -59,6 +60,7 @@ export function EditorClientShell({
 				onProjectNameChange={setProjectName}
 				slug={slug}
 				loading={loading}
+				error={error}
 				selectedProjectName={selectedProject?.name}
 				onClose={close}
 				onCreate={handleCreate}

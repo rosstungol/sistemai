@@ -11,6 +11,7 @@ type ProjectDialogsProps = {
 	onProjectNameChange: (name: string) => void
 	slug: string
 	loading: boolean
+	error: string | null
 	selectedProjectName?: string
 	onClose: () => void
 	onCreate: () => void
@@ -24,6 +25,7 @@ export function ProjectDialogs({
 	onProjectNameChange,
 	slug,
 	loading,
+	error,
 	selectedProjectName,
 	onClose,
 	onCreate,
@@ -48,6 +50,7 @@ export function ProjectDialogs({
 				open={dialogType === 'create'}
 				onClose={onClose}
 				title='Create Project'
+				error={error}
 				actionLabel='Create'
 				actionLoadingLabel='Creating...'
 				onAction={onCreate}
@@ -73,6 +76,7 @@ export function ProjectDialogs({
 				onClose={onClose}
 				title='Rename Project'
 				description={`Rename \u201C${selectedProjectName}\u201D`}
+				error={error}
 				actionLabel='Rename'
 				actionLoadingLabel='Renaming...'
 				onAction={onRename}
@@ -95,6 +99,7 @@ export function ProjectDialogs({
 				onClose={onClose}
 				title='Delete Project'
 				description={`Are you sure you want to delete \u201C${selectedProjectName}\u201D? This action cannot be undone.`}
+				error={error}
 				actionLabel='Delete'
 				actionLoadingLabel='Deleting...'
 				onAction={onDelete}

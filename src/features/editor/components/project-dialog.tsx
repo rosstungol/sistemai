@@ -15,6 +15,7 @@ type ProjectDialogProps = {
 	onClose: () => void
 	title: string
 	description?: string
+	error?: string | null
 	children?: React.ReactNode
 	actionLabel: string
 	actionLoadingLabel: string
@@ -29,6 +30,7 @@ export function ProjectDialog({
 	onClose,
 	title,
 	description,
+	error,
 	children,
 	actionLabel,
 	actionLoadingLabel,
@@ -44,6 +46,9 @@ export function ProjectDialog({
 					<DialogTitle>{title}</DialogTitle>
 					{description && <DialogDescription>{description}</DialogDescription>}
 				</DialogHeader>
+				{error && (
+					<p className='text-xs text-red-500'>{error}</p>
+				)}
 				{children}
 				<DialogFooter>
 					<Button variant='outline' onClick={onClose}>

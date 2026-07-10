@@ -7,7 +7,7 @@ export async function PATCH(
 	{ params }: { params: Promise<{ projectId: string }> }
 ) {
 	const { isAuthenticated, userId } = await auth()
-	if (!isAuthenticated) {
+	if (!isAuthenticated || !userId) {
 		return Response.json({ error: 'Unauthorized' }, { status: 401 })
 	}
 
@@ -48,7 +48,7 @@ export async function DELETE(
 	{ params }: { params: Promise<{ projectId: string }> }
 ) {
 	const { isAuthenticated, userId } = await auth()
-	if (!isAuthenticated) {
+	if (!isAuthenticated || !userId) {
 		return Response.json({ error: 'Unauthorized' }, { status: 401 })
 	}
 
