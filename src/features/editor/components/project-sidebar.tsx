@@ -1,6 +1,7 @@
 'use client'
 
 import { MoreVertical, Pencil, Plus, Trash2, X } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import {
 	DropdownMenu,
@@ -19,6 +20,7 @@ type ProjectSidebarProps = {
 	onCreateProject: () => void
 	onRenameProject: (project: Project) => void
 	onDeleteProject: (project: Project) => void
+	activeProjectSlug?: string
 }
 
 export function ProjectSidebar({
@@ -28,6 +30,7 @@ export function ProjectSidebar({
 	onCreateProject,
 	onRenameProject,
 	onDeleteProject,
+	activeProjectSlug,
 }: ProjectSidebarProps) {
 	const ownedProjects = projects.filter((p) => p.isOwner)
 	const sharedProjects = projects.filter((p) => !p.isOwner)
@@ -85,37 +88,52 @@ export function ProjectSidebar({
 							</div>
 						) : (
 							<ul className='mt-2 space-y-1'>
-								{ownedProjects.map((project) => (
-									<li
-										key={project.id}
-										className='group flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-text-secondary transition-colors hover:bg-bg-subtle'
-									>
-										<span className='truncate'>{project.name}</span>
-										<DropdownMenu>
-											<DropdownMenuTrigger
-												aria-label={`Actions for ${project.name}`}
-												className='flex items-center justify-center rounded-md p-1 text-text-secondary transition-colors hover:bg-bg-subtle focus:outline-none'
+								{ownedProjects.map((project) => {
+									const isActive = project.slug === activeProjectSlug
+									return (
+										<li
+											key={project.id}
+											className={cn(
+												'group flex items-center justify-between rounded-lg px-2 py-1.5 text-sm transition-colors',
+												isActive
+													? 'bg-accent-primary-dim text-accent-primary'
+													: 'text-text-secondary hover:bg-bg-subtle'
+											)}
+										>
+											<Link
+												href={`/editor/${project.slug}`}
+												className='min-w-0 flex-1 truncate'
+												onClick={onClose}
+												prefetch={false}
 											>
-												<MoreVertical className='size-3' />
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align='end'>
-												<DropdownMenuItem
-													onClick={() => onRenameProject(project)}
+												{project.name}
+											</Link>
+											<DropdownMenu>
+												<DropdownMenuTrigger
+													aria-label={`Actions for ${project.name}`}
+													className='flex items-center justify-center rounded-md p-1 text-text-secondary transition-colors hover:bg-bg-subtle focus:outline-none'
 												>
-													<Pencil className='size-3' />
-													Rename
-												</DropdownMenuItem>
-												<DropdownMenuItem
-													variant='destructive'
-													onClick={() => onDeleteProject(project)}
-												>
-													<Trash2 className='size-3' />
-													Delete
-												</DropdownMenuItem>
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</li>
-								))}
+													<MoreVertical className='size-3' />
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align='end'>
+													<DropdownMenuItem
+														onClick={() => onRenameProject(project)}
+													>
+														<Pencil className='size-3' />
+														Rename
+													</DropdownMenuItem>
+													<DropdownMenuItem
+														variant='destructive'
+														onClick={() => onDeleteProject(project)}
+													>
+														<Trash2 className='size-3' />
+														Delete
+													</DropdownMenuItem>
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</li>
+									)
+								})}
 							</ul>
 						)}
 					</TabsContent>
@@ -127,14 +145,29 @@ export function ProjectSidebar({
 							</div>
 						) : (
 							<ul className='mt-2 space-y-1'>
-								{sharedProjects.map((project) => (
-									<li
-										key={project.id}
-										className='flex items-center rounded-lg px-2 py-1.5 text-sm text-text-secondary'
-									>
-										<span className='truncate'>{project.name}</span>
-									</li>
-								))}
+								{sharedProjects.map((project) => {
+									const isActive = project.slug === activeProjectSlug
+									return (
+										<li
+											key={project.id}
+											className={cn(
+												'flex items-center rounded-lg px-2 py-1.5 text-sm',
+												isActive
+													? 'bg-accent-primary-dim text-accent-primary'
+													: 'text-text-secondary'
+											)}
+										>
+											<Link
+												href={`/editor/${project.slug}`}
+												className='min-w-0 flex-1 truncate'
+												onClick={onClose}
+												prefetch={false}
+											>
+												{project.name}
+											</Link>
+										</li>
+									)
+								})}
 							</ul>
 						)}
 					</TabsContent>
