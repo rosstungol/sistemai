@@ -47,7 +47,9 @@ export function ProjectDialog({
 					{description && <DialogDescription>{description}</DialogDescription>}
 				</DialogHeader>
 				{error && (
-					<p className='text-xs text-red-500'>{error}</p>
+					<p role='alert' className='text-state-error text-xs'>
+						{error}
+					</p>
 				)}
 				{children}
 				<DialogFooter>
