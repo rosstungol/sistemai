@@ -14,9 +14,13 @@ export function AccessDenied() {
 					You don&apos;t have access to this project.
 				</p>
 			</div>
-			<Link href='/editor'>
-				<Button variant='outline'>Back to Editor</Button>
-			</Link>
+			<Button
+				variant='outline'
+				render={<Link href='/editor' />}
+				nativeButton={false}
+			>
+				Back to Editor
+			</Button>
 		</div>
 	)
 }

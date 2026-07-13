@@ -14,7 +14,7 @@ Collaborators can:
 
 Collaborators are stored by email in the database.
 
-User Clerk Backend API to enrich collaborator emails with:
+Use Clerk User Backend API to enrich collaborator emails with:
 - Display name
 - Avatar image
 

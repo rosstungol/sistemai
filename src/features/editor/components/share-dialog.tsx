@@ -40,6 +40,7 @@ export function ShareDialog({
 	const [inviting, setInviting] = useState(false)
 	const [inviteError, setInviteError] = useState<string | null>(null)
 	const [removingId, setRemovingId] = useState<string | null>(null)
+	const [removeError, setRemoveError] = useState<string | null>(null)
 	const [copied, setCopied] = useState(false)
 	const inputRef = useRef<HTMLInputElement>(null)
 
@@ -107,6 +108,7 @@ export function ShareDialog({
 	const handleRemove = useCallback(
 		async (collaboratorId: string) => {
 			setRemovingId(collaboratorId)
+			setRemoveError(null)
 			try {
 				const res = await fetch(`/api/projects/${projectId}/collaborators`, {
 					method: 'DELETE',
@@ -116,7 +118,7 @@ export function ShareDialog({
 				if (!res.ok) throw new Error('Failed to remove collaborator')
 				await fetchCollaborators()
 			} catch {
-				// Silently fail
+				setRemoveError('Failed to remove collaborator')
 			} finally {
 				setRemovingId(null)
 			}
@@ -181,6 +183,11 @@ export function ShareDialog({
 				{inviteError && (
 					<p role='alert' className='text-state-error text-xs'>
 						{inviteError}
+					</p>
+				)}
+				{removeError && (
+					<p role='alert' className='text-state-error text-xs'>
+						{removeError}
 					</p>
 				)}
 
@@ -252,7 +259,7 @@ export function ShareDialog({
 
 				<div className='-mx-4 -mb-4 flex items-center justify-between rounded-b-xl border-border-default border-t px-4 py-3'>
 					<p className='text-text-muted text-xs'>
-						Anyone with the link can view
+						Only collaborators can access this project
 					</p>
 					<Button variant='outline' size='sm' onClick={handleCopyLink}>
 						{copied ? (
