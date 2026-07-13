@@ -132,10 +132,10 @@ export function ProjectSidebar({
 									<li
 										key={project.id}
 										className={cn(
-											'flex items-center rounded-lg px-2 py-1.5 text-sm',
+											'flex items-center rounded-lg px-2 py-1.5 text-sm transition-colors',
 											isActive
 												? 'bg-accent-primary-dim text-accent-primary'
-												: 'text-text-secondary'
+												: 'text-text-secondary hover:bg-bg-subtle'
 										)}
 									>
 										<Link
