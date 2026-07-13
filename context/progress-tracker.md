@@ -3,12 +3,28 @@
 Update this file whenever the current phase, active feature, or implementation state changes.
 
 ## Current Phase
-- Editor home — wiring sidebar and dialogs to real project API
+- Editor workspace shell — access control and layout scaffolding
 
 ## Current Goal
-- Server-side data fetching, real project mutations, navigation, and refresh
+- Canvas workspace and project canvas data binding
 
 ## Completed
+
+### 09 — Share Dialog (`context/feature-specs/09-share-dialog.md`)
+- Created `src/app/api/projects/[projectId]/collaborators/route.ts`:
+  - `GET` — lists collaborators enriched with Clerk user data (display name, avatar) via `clerkClient.users.getUserList()`, falls back to email-only display when no Clerk user is found; includes `isOwner` flag for the requesting user
+  - `POST` — invites a collaborator by email (owner-only, 403 for non-owners). Validates email format, returns 409 for duplicate collaborators. `@unique([projectId, email])` constraint enforces uniqueness at DB level
+  - `DELETE` — removes a collaborator by `collaboratorId` (owner-only, 403 for non-owners)
+  - All routes enforce Clerk authentication (401 for unauthenticated, 404 for missing projects)
+- Created `src/features/editor/components/share-dialog.tsx` — `ShareDialog` component:
+  - Fetches collaborator list on open; shows loading spinner while fetching
+  - **Owner view**: invite input with email validation (Enter to submit), collapsible list with remove button (`UserMinus` icon) per collaborator, "Copy link" button in the footer
+  - **Collaborator view**: read-only list of collaborators
+  - Collaborator rows display Clerk avatar (if available) or a `Mail` icon fallback, display name and email when Clerk data is found, email-only when not
+  - Copy link button with temporary "Copied!" feedback (`Check` icon, 2s timeout)
+  - Uses existing `Dialog` component (shadcn v4 base-nova, `@base-ui/react/dialog`)
+- Updated `EditorClientShell` — added `isShareOpen` state, wired `onShare` navbar callback, renders `ShareDialog` conditionally when `currentProject` is defined (only visible on workspace pages)
+- Production build: zero TypeScript errors, zero build errors
 
 ### 05 — Prisma (`context/feature-specs/05-prisma.md`)
 - Created `prisma/models/project.prisma` with `Project` (ownerId, name, description, status, canvasJsonPath, timestamps, indexes) and `ProjectCollaborator` (project relation with cascade delete, email, timestamps, unique constraint, indexes)
@@ -72,6 +88,16 @@ Update this file whenever the current phase, active feature, or implementation s
 - Moved `lib/prisma.ts` to `src/lib/prisma.ts` for consistency with `@/*` alias (maps to `./src/*`)
 - Production build passes with zero TypeScript errors
 
+### 08 — Editor Workspace Shell (`context/feature-specs/08-editor-workspace-shell.md`)
+- Created `src/lib/project-access.ts` with `getCurrentIdentity()` (userId + email from Clerk) and `checkProjectAccess(slug)` (looks up project by slug, verifies owner or collaborator, returns project data or null)
+- Created `src/features/editor/components/access-denied.tsx` — centered layout with lock icon, "Access Denied" message, and Back to Editor link
+- Created `src/app/editor/[roomId]/page.tsx` — server component that awaits `params`, redirects unauthenticated users to `/sign-in`, displays `AccessDenied` for missing or unauthorized projects, and renders canvas placeholder on success
+- Modified `EditorNavbar` — added optional `projectName`, `onShare`, `onToggleAi`, `isAiOpen` props; conditionally shows project name with divider, Share icon button, and AI toggle button (AI button highlighted when active)
+- Modified `ProjectSidebar` — added `activeProjectSlug` prop for highlighting the current room; project items are now `Link` elements navigating to `/editor/<slug>`, clicking closes the sidebar, active project highlighted with accent background and text colors
+- Modified `EditorClientShell` — detects current room via `useParams()`, resolves current project from the projects list, passes project info to `EditorNavbar` and `activeProjectSlug` to `ProjectSidebar`, manages `isAiOpen` state, renders AI sidebar placeholder alongside children (closed by default, toggled from navbar, shows AI Assistant header with bot icon and placeholder message)
+- Fixed `use-project-dialog` delete check: now compares against `slug` instead of `id` for active workspace detection (URLs use slugs)
+- Production build: zero TypeScript errors, zero build errors
+
 ### 07 — Editor Home (`context/feature-specs/07-editor-home.md`)
 - Added `slug` field to Prisma `Project` model (unique) and pushed schema to database
 - Created `src/lib/projects.ts` — `getUserProjects()` server-only helper that fetches owned and shared projects via Prisma
@@ -100,6 +126,9 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Next Up
 - Canvas workspace and project canvas data binding
+- Real canvas logic with React Flow
+- Liveblocks integration for real-time collaboration
+- AI chat sidebar implementation
 
 ## Recently Completed
 
@@ -124,6 +153,10 @@ Update this file whenever the current phase, active feature, or implementation s
 - Route handler `params` is a Promise (Next.js 16 convention); must be awaited
 - `auth()` from `@clerk/nextjs/server` provides `isAuthenticated` and `userId` for server-side auth checks
 - `lib/prisma.ts` moved to `src/lib/prisma.ts` for consistency with the `@/*` path alias mapping to `./src/*`
+- Project access checks for workspace pages use `checkProjectAccess(slug)` in `lib/project-access.ts` — verifies ownership OR collaborator status by slug lookup; returns null for missing/unauthorized projects
+- Workspace page (`/editor/[roomId]`) is a server component that redirects unauthenticated users and renders `AccessDenied` for unauthorized access
+- Current room detected in `EditorClientShell` via `useParams()` and used to highlight the active project in the sidebar and pass the project name to the navbar
+- AI sidebar state managed in `EditorClientShell` and toggled from `EditorNavbar`; rendered as a right-side panel alongside children in the main area
 
 ## Session Notes
 - Design system foundation complete. All UI primitives are available and ready for feature development.
@@ -137,3 +170,8 @@ Update this file whenever the current phase, active feature, or implementation s
 - All dialog state, form state, and loading state managed by `useProjectDialog` hook (`features/editor/hooks/`), shared via `EditorDialogProvider` context (`features/editor/providers/`).
 - The `/editor` route is live, protected by Clerk middleware. Authenticated users see the editor home with New Project flow.
 - Project API routes implemented at `/api/projects` (GET, POST) and `/api/projects/[projectId]` (PATCH, DELETE). All routes enforce Clerk authentication. Mutations check project ownership (`ownerId === userId`). Missing projects return 404. Non-owner mutations return 403. Unauthenticated requests return 401.
+- Editor workspace shell (`/editor/[roomId]`) implemented: server component with access checks (unauthenticated → redirect, no access → AccessDenied), workspace layout with project name in navbar, Share/AI toggle buttons, sidebar highlighting current project, canvas placeholder, and AI sidebar placeholder.
+- `EditorNavbar` extended with optional workspace props: `projectName`, `onShare`, `onToggleAi`, `isAiOpen` — conditionally renders project name divider and action buttons.
+- `ProjectSidebar` project items now navigate to `/editor/<slug>` via `Link` and highlight the active project with accent color.
+- `use-project-dialog` delete check fixed to use `slug` instead of `id` for active workspace detection.
+- Production build: zero TypeScript errors, zero build errors.

@@ -75,7 +75,6 @@ export function ProjectDialogs({
 				open={dialogType === 'rename'}
 				onClose={onClose}
 				title='Rename Project'
-				description={`Rename \u201C${selectedProjectName}\u201D`}
 				error={error}
 				actionLabel='Rename'
 				actionLoadingLabel='Renaming...'
@@ -98,7 +97,7 @@ export function ProjectDialogs({
 				open={dialogType === 'delete'}
 				onClose={onClose}
 				title='Delete Project'
-				description={`Are you sure you want to delete \u201C${selectedProjectName}\u201D? This action cannot be undone.`}
+				description={`Are you sure you want to delete "${selectedProjectName}"? This action cannot be undone.`}
 				error={error}
 				actionLabel='Delete'
 				actionLoadingLabel='Deleting...'

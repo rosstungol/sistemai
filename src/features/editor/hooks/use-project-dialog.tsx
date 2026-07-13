@@ -116,7 +116,7 @@ export function useProjectDialog() {
 			close()
 
 			const isActiveWorkspace =
-				window.location.pathname === `/editor/${selectedProject.id}`
+				window.location.pathname === `/editor/${selectedProject.slug}`
 			if (isActiveWorkspace) {
 				router.push('/editor')
 				router.refresh()
