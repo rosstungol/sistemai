@@ -51,7 +51,6 @@ export async function GET(
 	}
 
 	const emails = project.collaborators.map((c) => c.email)
-	const enrichedEmails = new Set<string>()
 
 	const userMap: Record<
 		string,
@@ -66,10 +65,8 @@ export async function GET(
 		})
 
 		for (const u of users.data) {
-			const primaryEmail = u.emailAddresses?.[0]?.emailAddress
-			if (primaryEmail) {
-				enrichedEmails.add(primaryEmail.toLowerCase())
-				userMap[primaryEmail.toLowerCase()] = {
+			for (const e of u.emailAddresses ?? []) {
+				userMap[e.emailAddress.toLowerCase()] = {
 					firstName: u.firstName,
 					lastName: u.lastName,
 					imageUrl: u.imageUrl,
@@ -204,9 +201,19 @@ export async function DELETE(
 		return Response.json({ error: 'Collaborator not found' }, { status: 404 })
 	}
 
-	await prisma.projectCollaborator.delete({
-		where: { id: collaboratorId },
-	})
+	try {
+		await prisma.projectCollaborator.delete({
+			where: { id: collaboratorId },
+		})
+	} catch (e) {
+		if (
+			e instanceof Prisma.PrismaClientKnownRequestError &&
+			e.code === 'P2025'
+		) {
+			return Response.json({ error: 'Collaborator not found' }, { status: 404 })
+		}
+		throw e
+	}
 
 	return new Response(null, { status: 204 })
 }
