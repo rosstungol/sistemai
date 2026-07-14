@@ -10,6 +10,22 @@ Update this file whenever the current phase, active feature, or implementation s
 
 ## Completed
 
+### 10 — Liveblocks Setup (`context/feature-specs/10-liveblocks-setup.md`)
+- Replaced `liveblocks.config.ts` at project root with typed `Presence` (cursor, isThinking) and `UserMeta` (id, name, avatar, cursorColor) — all other Liveblocks interfaces set to `{}`
+- Created `src/lib/liveblocks.ts` — cached server-only module with:
+  - `getCursorColor(userId)` — deterministic color from a 10-color palette via string hash
+  - `ensureRoomExists(roomId)` — idempotent `PUT` to Liveblocks REST API
+  - `authorizeUser({ roomId, userId, userInfo })` — issues a token via `POST /v2/rooms/{roomId}/authorize`
+- Created `src/app/api/liveblocks-auth/route.ts` — `POST` handler that:
+  1. Requires Clerk authentication (returns 401)
+  2. Looks up project by `roomId` (project ID) via Prisma
+  3. Verifies owner or collaborator access (returns 403 for unauthorized)
+  4. Generates cursor color from user ID
+  5. Ensures the Liveblocks room exists (creates if needed)
+  6. Issues a Liveblocks token with user metadata (name, avatar, cursorColor)
+  7. Returns `{ token }` for the client to join the room
+- Production build: zero TypeScript errors, zero build errors
+
 ### 09 — Share Dialog (`context/feature-specs/09-share-dialog.md`)
 - Created `src/app/api/projects/[projectId]/collaborators/route.ts`:
   - `GET` — lists collaborators enriched with Clerk user data (display name, avatar) via `clerkClient.users.getUserList()`, falls back to email-only display when no Clerk user is found; includes `isOwner` flag for the requesting user
@@ -127,7 +143,6 @@ Update this file whenever the current phase, active feature, or implementation s
 ## Next Up
 - Canvas workspace and project canvas data binding
 - Real canvas logic with React Flow
-- Liveblocks integration for real-time collaboration
 - AI chat sidebar implementation
 
 ## Recently Completed
@@ -157,6 +172,9 @@ Update this file whenever the current phase, active feature, or implementation s
 - Workspace page (`/editor/[roomId]`) is a server component that redirects unauthenticated users and renders `AccessDenied` for unauthorized access
 - Current room detected in `EditorClientShell` via `useParams()` and used to highlight the active project in the sidebar and pass the project name to the navbar
 - AI sidebar state managed in `EditorClientShell` and toggled from `EditorNavbar`; rendered as a right-side panel alongside children in the main area
+- Liveblocks auth uses REST API directly via `fetch` (no `@liveblocks/node` package); `ensureRoomExists` uses `PUT /v2/rooms/{id}` and `authorizeUser` uses `POST /v2/rooms/{id}/authorize`
+- The project `id` (cuid) is used as the Liveblocks room ID — passed by the client as `roomId` in the auth POST body
+- Cursor color is deterministic: string hash of the Clerk `userId` modulo a 10-color palette matching the project's accent palette
 
 ## Session Notes
 - Design system foundation complete. All UI primitives are available and ready for feature development.
